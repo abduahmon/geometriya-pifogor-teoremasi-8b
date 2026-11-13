@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Pifagor Teoremasi Vizualizatsiyasi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #070b14;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            user-select: none;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            touch-action: none;
+        }
+        /* Custom Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.12);
+            height: 6px;
+            border-radius: 999px;
+        }
+        input[type="range"]#sliderA::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #22d3ee;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(34, 211, 238, 0.9);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]#sliderB::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #f43f5e;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.9);
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+    </style>
+</head>
+<body class="bg-[#070b14] text-white antialiased">
+
+    <!-- Dark Glassmorphism UI Panel -->
+    <div class="fixed top-4 left-4 sm:top-6 sm:left-6 z-10 w-[calc(100vw-2rem)] max-w-[340px] bg-slate-900/80 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.75)]">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-extrabold tracking-tight text-amber-400 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                3D Pifagor Teoremasi
+            </h2>
+            <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-400/25">
+                a² + b² = c²
+            </span>
+        </div>
+
+        <!-- Sliders for Side A and Side B -->
+        <div class="space-y-3.5 my-4">
+            <div class="bg-cyan-500/10 p-3 rounded-xl border border-cyan-400/20">
+                <div class="flex justify-between items-center text-xs font-semibold mb-1.5">
+                    <label for="sliderA" class="text-cyan-300">1-katet (a tomoni):</label>
+                    <span id="valA" class="font-mono text-sm font-bold text-cyan-400">3.0</span>
+                </div>
+                <input type="range" id="sliderA" min="1.5" max="5.5" step="0.5" value="3.0" class="w-full">
+            </div>
+
+            <div class="bg-rose-500/10 p-3 rounded-xl border border-rose-400/20">
+                <div class="flex justify-between items-center text-xs font-semibold mb-1.5">
+                    <label for="sliderB" class="text-rose-300">2-katet (b tomoni):</label>
+                    <span id="valB" class="font-mono text-sm font-bold text-rose-400">4.0</span>
+                </div>
+                <input type="range" id="sliderB" min="1.5" max="5.5" step="0.5" value="4.0" class="w-full">
+            </div>
+        </div>
+
+        <!-- Live Mathematical Proof & Calculations -->
+        <div class="bg-white/[0.03] p-3.5 rounded-xl border border-white/10 space-y-2 text-xs sm:text-sm">
+            <div class="flex justify-between items-center">
+                <span class="text-cyan-300 font-medium">a² (Ko'k kvadrat):</span>
+                <span id="areaA" class="font-mono font-bold text-cyan-400">9.00</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-rose-300 font-medium">b² (Qizil kvadrat):</span>
+                <span id="areaB" class="font-mono font-bold text-rose-400">16.00</span>
+            </div>
+            <div class="border-t border-white/10 pt-2 flex justify-between items-center">
+                <span class="text-amber-300 font-semibold">c² = a² + b² (Oltin):</span>
+                <span id="areaC" class="font-mono font-extrabold text-amber-400">25.00</span>
+            </div>
+            <div class="flex justify-between items-center text-xs text-slate-300 pt-1">
+                <span>Gipotenuza uzunligi (c):</span>
+                <span id="valC" class="font-mono font-bold text-white bg-white/10 px-2 py-0.5 rounded">5.00</span>
+            </div>
+        </div>
+
+        <!-- Dynamic Formula Equation Banner -->
+        <div id="equationProof" class="mt-3 py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500/15 via-rose-500/15 to-amber-500/15 border border-white/10 text-center font-mono text-xs sm:text-sm font-bold text-slate-100">
+            9.00 + 16.00 = 25.00 ✓
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2 mt-4">
+            <button id="preset345" class="flex-1 py-2 px-3 bg-white/5 hover:bg-white/10 active:scale-[0.98] text-xs font-semibold text-slate-200 rounded-xl border border-white/10 transition-all cursor-pointer">
+                Misr uchburchagi (3:4:5)
+            </button>
+            <button id="resetCamBtn" title="Kamerani tiklash" class="p-2 bg-amber-500/20 hover:bg-amber-500/30 active:scale-[0.95] text-amber-300 rounded-xl border border-amber-400/30 transition-all cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bottom Hint -->
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none w-max max-w-[90vw] text-center">
+        <span class="inline-block px-4 py-1.5 rounded-full bg-slate-900/75 backdrop-blur-md border border-white/10 text-slate-400 text-xs font-medium shadow-lg">
+            Sichqoncha yoki barmoq bilan 3D modelni aylantiring • Yaqinlashtiring
+        </span>
+    </div>
+
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        window.onload = function () {
+            // 1. Sahna, Kamera va Renderer
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x070b14, 0.022);
+
+            const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const defaultCamPos = new THREE.Vector3(0, 11.5, 13.5);
+            const defaultTarget = new THREE.Vector3(0, 0, 0.5);
+            camera.position.copy(defaultCamPos);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.body.appendChild(renderer.domElement);
+
+            // 2. OrbitControls
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.06;
+            controls.target.copy(defaultTarget);
+
+            // 3. Yorug'liklar (Neon effektlar uchun)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            dirLight.position.set(8, 15, 10);
+            scene.add(dirLight);
+
+            const cyanLight = new THREE.PointLight(0x22d3ee, 1.5, 35);
+            cyanLight.position.set(-6, 4, 2);
+            scene.add(cyanLight);
+
+            const roseLight = new THREE.PointLight(0xf43f5e, 1.5, 35);
+            roseLight.position.set(2, 4, -6);
+            scene.add(roseLight);
+
+            const goldLight = new THREE.PointLight(0xfbbf24, 1.6, 35);
+            goldLight.position.set(5, 4, 5);
+            scene.add(goldLight);
+
+            // 4. Koordinata to'ri (Floor Grid)
+            const gridHelper = new THREE.GridHelper(32, 32, 0x1e293b, 0x0f172a);
+            gridHelper.position.y = -0.35;
+            scene.add(gridHelper);
+
+            // Geometrik ob'ektlar uchun guruh
+            const pythagorasGroup = new THREE.Group();
+            scene.add(pythagorasGroup);
+
+            // 3D Qalinlik (balandlik)
+            const slabThickness = 0.45;
+
+            // Materiallar (Glowing Neon Glass & Edges)
+            const matTriangle = new THREE.MeshStandardMaterial({
+                color: 0xe2e8f0,
+                emissive: 0x334155,
+                emissiveIntensity: 0.4,
+                roughness: 0.25,
+                metalness: 0.3
+            });
+
+            const matA = new THREE.MeshStandardMaterial({
+                color: 0x06b6d4,
+                emissive: 0x0891b2,
+                emissiveIntensity: 0.45,
+                transparent: true,
+                opacity: 0.82,
+                roughness: 0.15
+            });
+
+            const matB = new THREE.MeshStandardMaterial({
+                color: 0xf43f5e,
+                emissive: 0xe11d48,
+                emissiveIntensity: 0.45,
+                transparent: true,
+                opacity: 0.82,
+                roughness: 0.15
+            });
+
+            const matC = new THREE.MeshStandardMaterial({
+                color: 0xf59e0b,
+                emissive: 0xd97706,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 0.85,
+                roughness: 0.15
+            });
+
+            // Kontur chiziqlar (Glowing Neon Wireframes)
+            function createNeonBox(size, material, edgeColor) {
+                const holder = new THREE.Group();
+                const geo = new THREE.BoxGeometry(size, slabThickness, size);
+                const mesh = new THREE.Mesh(geo, material);
+                holder.add(mesh);
+
+                const edgesGeo = new THREE.EdgesGeometry(geo);
+                const edgesMat = new THREE.LineBasicMaterial({ color: edgeColor });
+                const wireframe = new THREE.LineSegments(edgesGeo, edgesMat);
+                holder.add(wireframe);
+
+                // Kvadrat ichidagi 1x1 birlik katakchalar (vizual isbot uchun)
+                const grid = new THREE.GridHelper(size, Math.max(1, Math.round(size)), edgeColor, edgeColor);
+                grid.position.y = slabThickness / 2 + 0.005;
+                grid.material.transparent = true;
+                grid.material.opacity = 0.45;
+                holder.add(grid);
+
+                return holder;
+            }
+
+            // UI Elementlari
+            const sliderA = document.getElementById('sliderA');
+            const sliderB = document.getElementById('sliderB');
+            const valAEl = document.getElementById('valA');
+            const valBEl = document.getElementById('valB');
+            const valCEl = document.getElementById('valC');
+            const areaAEl = document.getElementById('areaA');
+            const areaBEl = document.getElementById('areaB');
+            const areaCEl = document.getElementById('areaC');
+            const eqProofEl = document.getElementById('equationProof');
+            const preset345Btn = document.getElementById('preset345');
+            const resetCamBtn = document.getElementById('resetCamBtn');
+
+            // 3D Sahna geometriyasini yangilash funksiyasi
+            function updateGeometry() {
+                const a = parseFloat(sliderA.value);
+                const b = parseFloat(sliderB.value);
+                const c = Math.sqrt(a * a + b * b);
+
+                // UI matnlarini yangilash
+                valAEl.textContent = a.toFixed(1);
+                valBEl.textContent = b.toFixed(1);
+                valCEl.textContent = c.toFixed(2);
+
+                const a2 = a * a;
+                const b2 = b * b;
+                const c2 = c * c;
+
+                areaAEl.textContent = a2.toFixed(2);
+                areaBEl.textContent = b2.toFixed(2);
+                areaCEl.textContent = c2.toFixed(2);
+                eqProofEl.textContent = `${a2.toFixed(2)} + ${b2.toFixed(2)} = ${c2.toFixed(2)} ✓`;
+
+                // Eski ob'ektlarni tozalash
+                while (pythagorasGroup.children.length > 0) {
+                    const obj = pythagorasGroup.children[0];
+                    pythagorasGroup.remove(obj);
+                }
+
+                // To'g'ri burchakli uchburchak uchlari (XZ tekislikda)
+                // To'g'ri burchak C(0, 0), A(b, 0), B(0, a)
+                const triShape = new THREE.Shape();
+                triShape.moveTo(0, 0);
+                triShape.lineTo(b, 0);
+                triShape.lineTo(0, -a); // Z o'qida oldinga chiqishi uchun -a
+                triShape.closePath();
+
+                const extrudeSettings = {
+                    depth: slabThickness,
+                    bevelEnabled: true,
+                    bevelSegments: 2,
+                    steps: 1,
+                    bevelSize: 0.03,
+                    bevelThickness: 0.03
+                };
+
+                const triGeo = new THREE.ExtrudeGeometry(triShape, extrudeSettings);
+                triGeo.rotateX(-Math.PI / 2); // Gorizontal tekislikka yotqizish
+                triGeo.translate(0, -slabThickness / 2, 0);
+
+                const triMesh = new THREE.Mesh(triGeo, matTriangle);
+                pythagorasGroup.add(triMesh);
+
+                // Uchburchak konturi
+                const triEdges = new THREE.LineSegments(
+                    new THREE.EdgesGeometry(triGeo),
+                    new THREE.LineBasicMaterial({ color: 0xffffff })
+                );
+                pythagorasGroup.add(triEdges);
+
+                // To'g'ri burchak belgisi (90° burchakdagi kichik kvadrat)
+                const markerSize = Math.min(0.45, a * 0.25, b * 0.25);
+                const markerGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(markerSize, slabThickness / 2 + 0.02, 0),
+                    new THREE.Vector3(markerSize, slabThickness / 2 + 0.02, markerSize),
+                    new THREE.Vector3(0, slabThickness / 2 + 0.02, markerSize)
+                ]);
+                const markerLine = new THREE.Line(markerGeo, new THREE.LineBasicMaterial({ color: 0xfbbf24 }));
+                pythagorasGroup.add(markerLine);
+
+                // 1. 'a' tomonidagi Kvadrat/Hajm (Chap tomonda: X = -a/2, Z = a/2)
+                const boxA = createNeonBox(a, matA, 0x22d3ee);
+                boxA.position.set(-a / 2, 0, a / 2);
+                pythagorasGroup.add(boxA);
+
+                // 2. 'b' tomonidagi Kvadrat/Hajm (Yuqori/Orqa tomonda: X = b/2, Z = -b/2)
+                const boxB = createNeonBox(b, matB, 0xf43f5e);
+                boxB.position.set(b / 2, 0, -b / 2);
+                pythagorasGroup.add(boxB);
+
+                // 3. 'c' (Gipotenuza) tomonidagi Kvadrat/Hajm (Oltin rangda)
+                // Gipotenuza (b, 0) dan (0, a) gacha cho'zilgan
+                const boxC = createNeonBox(c, matC, 0xfbbf24);
+                const midX = b / 2;
+                const midZ = a / 2;
+                // Tashqi normal vektor (a, b) uzunligi c
+                const nx = a / c;
+                const nz = b / c;
+                boxC.position.set(midX + nx * (c / 2), 0, midZ + nz * (c / 2));
+
+                // Gipotenuza burchagiga moslab burish
+                const angle = Math.atan2(a, b);
+                boxC.rotation.y = angle;
+                pythagorasGroup.add(boxC);
+
+                // Butun modelni sahna markaziga keltirish
+                pythagorasGroup.position.set(-b * 0.35, 0, -a * 0.35);
+            }
+
+            // Hodisalar (Slayder va Tugmalar)
+            sliderA.addEventListener('input', updateGeometry);
+            sliderB.addEventListener('input', updateGeometry);
+
+            preset345Btn.addEventListener('click', () => {
+                sliderA.value = 3.0;
+                sliderB.value = 4.0;
+                updateGeometry();
+            });
+
+            resetCamBtn.addEventListener('click', () => {
+                camera.position.copy(defaultCamPos);
+                controls.target.copy(defaultTarget);
+                controls.update();
+            });
+
+            // Boshlang'ich chizish
+            updateGeometry();
+
+            // Animatsiya sikli (Yengil nafas olish/suzish effekti)
+            let clock = new THREE.Clock();
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsed = clock.getElapsedTime();
+
+                // Modelning yengil suzuvchi harakati
+                pythagorasGroup.position.y = Math.sin(elapsed * 1.5) * 0.08;
+
+                controls.update();
+                renderer.render(scene, camera);
+            }
+
+            // Ekran o'lchami o'zgarganda moslashish
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            animate();
+        };
+    </script>
+</body>
+</html>
